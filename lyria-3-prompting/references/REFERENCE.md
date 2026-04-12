@@ -2,150 +2,200 @@
 
 ## Models
 
-| Model ID | Description |
-|---|---|
-| `lyria-3-clip-preview` | 30-second clips; ideal for loops and experiments |
-| `lyria-3-pro-preview` | Full songs up to 3 minutes; verse/chorus/bridge structure, vocals |
+| Model ID | Description | Output length | Audio format |
+|---|---|---|---|
+| `lyria-3-clip-preview` | Short clips, loops, rapid prototyping | Exactly 30 seconds | MP3 |
+| `lyria-3-pro-preview` | Full songs: verse/chorus/bridge/outro | Up to ~3 minutes | MP3 or WAV |
 
-OpenRouter model id: `google/lyria-3-pro-preview`  
-OpenRouter page: https://openrouter.ai/google/lyria-3-pro-preview  
-Gemini API docs: https://ai.google.dev/gemini-api/docs/music-generation  
-
----
-
-## Prompt construction
-
-### Genre / era
-
-Pick a genre and era for a consistent sonic palette:
-- `early 90s hip-hop`
-- `2000s pop`
-- `1950s jazz`
-- `K-pop with a Motown edge`
-- `classical violins fused into a funk track`
-
-### Tempo
-
-Set tempo explicitly or implicitly through genre:
-- `slow ballad`
-- `fast drum and bass`
-- `120 BPM`
-- `medium-fast driving pulse`
-
-### Instruments
-
-Lyria picks instruments automatically from genre if unspecified. Override with:
-- `acoustic guitar, cello, ambient pads`
-- `80s synth added to a 1950s jazz band`
-- `no guitar — only brass and strings`
-
-### Dynamics and structure
-
-Describe how the music evolves:
-- `quiet piano intro builds into an explosive chorus`
-- `instrumental bridge with half-time feel`
-- `vocals get softer and fade out over the last 30 seconds`
-
-### Mood / emotion
-
-- `uplifting and expansive`
-- `melancholic and introspective`
-- `tense and suspenseful`
-- `playful and whimsical`
+- **Output audio**: 44.1 kHz stereo (not 48 kHz as previously noted)
+- **SynthID watermark**: all outputs are imperceptibly watermarked; does not affect listening
+- **C2PA metadata**: cryptographically signed provenance metadata embedded in all outputs
+- OpenRouter: `google/lyria-3-pro-preview` — $0.08/song — https://openrouter.ai/google/lyria-3-pro-preview
+- Gemini API docs: https://ai.google.dev/gemini-api/docs/music-generation
 
 ---
 
-## Prompting vocals and lyrics
+## Supported vocal languages
+
+English, German, Spanish, French, Hindi, Japanese, Korean, Portuguese
+
+To target a language: write the prompt **in that language**, or add `Sing in Japanese` / `Lyrics in French` explicitly.
+
+---
+
+## Section tags
+
+Use these tags inline in the prompt to define song structure. Lyria will honor them:
+
+```
+[Intro] Soft acoustic guitar only, no drums.
+[Verse 1] Male vocal enters, quiet and intimate.
+[Pre-Chorus] Energy builds — bass comes in.
+[Chorus] Full band drops. Vocals soar with harmonies.
+[Verse 2] Same as verse 1 but with added strings.
+[Bridge] Stripped to piano only, emotional and sparse.
+[Hook] Short melodic motif repeated.
+[Outro] Gradual fade, return to acoustic guitar.
+```
+
+Available: `[Intro]` `[Verse]` `[Verse 1]` `[Verse 2]` `[Pre-Chorus]` `[Chorus]` `[Bridge]` `[Hook]` `[Outro]`
+
+---
+
+## Timestamp prompting
+
+Use `[MM:SS]` markers to assign specific instructions to moments in the song. Timestamps snap to the nearest musical bar — do not expect sample-accurate sync.
+
+```
+[00:00] Begin with a massive gospel choir, powerful and uplifting.
+[00:15] Heavy hip-hop drums and deep 808 bass drop in.
+[00:30] Male rapper delivers a confident verse; choir punctuates his lines.
+[01:10] Transition into a triumphant chorus — gospel choir at full volume, brass horns.
+[01:50] Strip back to Hammond B3 organ; quiet emotional bridge, soft choir hums.
+[02:10] Full beat and choir return at maximum energy for the final chorus.
+[03:00] End on a sustained, resonant choir chord.
+```
+
+---
+
+## Custom lyrics format
+
+Use `Lyrics:` before each section. Use `[Section]` tags to label parts:
+
+```
+Create a dreamy indie pop song.
+
+[Verse 1]
+Lyrics:
+Walking through the neon glow,
+city lights reflect below,
+every shadow tells a story,
+every corner, fading glory.
+
+[Chorus]
+Lyrics:
+We are the echoes in the night,
+burning brighter than the light,
+hold on tight, don't let me go,
+we are the echoes down below.
+
+[Verse 2]
+Lyrics:
+Footsteps lost on empty streets,
+rhythms sync to heartbeats,
+whispers carried by the breeze,
+dancing through the autumn leaves.
+```
+
+Backing vocals — use parentheses:
+```
+Lyrics: Let's go (go) to the other side (other side)
+```
+
+---
+
+## Prompt construction — element details
+
+### Genre & era
+- `early 90s hip-hop`, `2000s pop`, `1950s jazz`, `K-pop with a Motown edge`
+- `classical violins fused into a funk track`, `80s synthwave`, `2020s indie folk`
+- Genre blends work well: `jazz fusion`, `lo-fi hip-hop`, `cinematic orchestral`, `afrobeats with reggaeton rhythm`
+
+### Tempo & rhythm
+- Explicit BPM: `85 BPM`, `120 BPM`, `140 BPM`
+- Descriptive: `slow ballad`, `fast drum and bass`, `medium-fast driving pulse`, `laid-back shuffle`, `double-time groove`
+
+### Instruments (be specific — generic names produce generic results)
+- Piano types: `Fender Rhodes`, `upright piano`, `grand piano`, `honky-tonk piano`, `prepared piano`
+- Guitar types: `acoustic nylon-string guitar`, `slide guitar`, `Stratocaster electric guitar`, `12-string acoustic`
+- Bass: `upright bass`, `slap bass`, `fretless bass`, `synth bass`, `TR-808 bass`
+- Drums: `TR-808 drum machine`, `brushed jazz kit`, `boom-bap drums`, `live rock kit`, `hand percussion`
+- Synths: `analog Moog synth`, `Oberheim pads`, `DX7 FM synth`, `modular synth arpeggios`
+- Brass/strings: `French horns`, `string quartet`, `solo cello`, `gospel choir`, `Hammond B3 organ`
+
+### Key / scale
+Lyria honors musical key and scale specifications:
+- Major keys: `in G major`, `in C major`, `in A♭ major`
+- Minor keys: `in D minor`, `in E minor`, `in B minor`
+- Modes: `Dorian mode`, `Mixolydian`, `Lydian`
+
+### Mood descriptors
+- Energy: `high-energy`, `calm`, `intense`, `driving`, `relaxed`, `explosive`
+- Emotion: `melancholic`, `triumphant`, `nostalgic`, `anxious`, `euphoric`, `bittersweet`, `ethereal`, `raw`
+- Atmosphere: `cinematic`, `intimate`, `vast and epic`, `lo-fi and warm`, `dark and brooding`
 
 ### Vocal profile
-
-Describe voice characteristics:
-- `male baritone, commanding and rich`
-- `female soprano, clear and high`
-- `gravelly blues voice`
-- `soulful R&B voice, breathy`
-
-### Custom lyrics
-
-Prepend `Lyrics:` to the lines you want sung:
-
-```
-Lyrics:
-Walking through the city lights (city lights)
-Every step I take feels right (feels right)
-```
-
-Use parentheses `(echo words)` for backing-vocal echoes.
-
-### AI-generated lyrics
-
-Let Lyria write lyrics by describing the theme:
-- `a love song about distance`
-- `a song about overcoming failure`
-- `a new happy birthday song for my best friend`
-
-### Instrumental-only
-
-```
-Instrumental only. No vocals.
-```
-
-### Multiple languages
-
-```
-Sing in Spanish.
-Lyrics in Japanese.
-```
+- Gender/range: `male baritone`, `female soprano`, `young tenor`, `mezzo-soprano`, `countertenor`
+- Texture: `gravelly`, `breathy`, `smooth`, `soulful`, `raw`, `polished`, `rich and warm`
+- Style: `rapping`, `spoken word`, `gospel belting`, `opera`, `whispered`, `call-and-response`
+- Dynamics: `starts confident, gets quieter and more emotional as the song progresses`
+- Duets: `vocal duet: smooth male tenor in English, soft female soprano in French`
 
 ---
 
-## Image-to-music
+## Multimodal inputs
 
-Supply an image part alongside a text description. Lyria interprets:
-- **Subject** — who or what is depicted; mood conveyed
-- **Location** — urban, nature, exotic landscape
-- **Activity** — posed portrait, action shot, etc.
+### Images (up to 10)
+Upload images to establish visual mood. Lyria interprets subject, location, and emotional atmosphere:
 
 ```python
-import pathlib
-from google import genai
-from google.genai import types
-
-client = genai.Client(api_key="YOUR_GEMINI_API_KEY")
-
-image_bytes = pathlib.Path("photo.jpg").read_bytes()
+from PIL import Image
+image = Image.open("desert_sunset.jpg")
 
 response = client.models.generate_content(
     model="lyria-3-pro-preview",
     contents=[
-        types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
-        "Generate a soundtrack that matches the mood and setting of this image.",
+        "An atmospheric ambient track inspired by the mood and colors in this image.",
+        image,
     ],
-    config=types.GenerateContentConfig(
-        response_modalities=["Audio", "Text"]
-    ),
 )
 ```
 
-Good image sources: holiday photos, pet photos, artwork, scientific diagrams,
-historical paintings, cartoons, illustrations.
+Good sources: nature photography, cityscapes, artwork, historical paintings, portraits, scientific diagrams.
+
+### PDF inputs
+PDF documents can also be used as input context alongside text prompts via the Gemini API.
 
 ---
 
-## Timestamped prompts
+## Output formats
 
-Control song structure explicitly by specifying what happens at each timestamp:
+### MP3 (default)
+Both models output MP3 by default.
 
+### WAV (Pro model only)
+Request WAV for higher fidelity post-processing:
+
+```python
+config=types.GenerateContentConfig(
+    response_modalities=["AUDIO", "TEXT"],
+    response_mime_type="audio/wav",
+)
 ```
-[0:00] Gentle acoustic guitar intro, no vocals
-[0:20] Female vocal enters, soft and intimate
-[0:50] Full band enters — drums, bass, electric guitar
-[1:30] Instrumental bridge, tempo doubles
-[2:00] Final chorus, full dynamics
-[2:40] Outro, vocals fade, guitar solo closes
+
+---
+
+## Parsing the API response (Gemini Python SDK)
+
+```python
+lyrics = []
+audio_data = None
+
+for part in response.parts:
+    if part.text is not None:
+        lyrics.append(part.text)
+    elif part.inline_data is not None:
+        audio_data = part.inline_data.data  # already bytes; no base64 decode needed
+
+if lyrics:
+    print("Lyrics:\n" + "\n".join(lyrics))
+
+if audio_data:
+    with open("output.mp3", "wb") as f:
+        f.write(audio_data)
 ```
 
-The model will also return timestamped lyrics in the response:
+Timestamped lyrics format returned:
 ```
 [0.0:] The air is still and cold up here
 [4.8:] The mountaintops are sharp and clear
@@ -154,57 +204,92 @@ The model will also return timestamped lyrics in the response:
 
 ---
 
-## Experimenting
+## Calling the API
 
-### Musicality
-- Prompt counterpoints and harmonies
-- Layer unusual instruments into genre expectations
-- Ask for specific chord progressions or scales
-
-### Vocals
-- Describe vocal patterns: `fast-paced delivery`, `laid-back groove`
-- Request call-and-response patterns
-- Layer multiple vocal styles: `lead soprano over gospel choir`
-
-### Images
-- Try wildly different images to hear how Lyria interprets them
-- Pair abstract art with genre prompts for unexpected results
-
----
-
-## Parsing API responses (Gemini)
-
+### Via Gemini API (Python)
 ```python
-# response.parts[0].text  → timestamped lyrics
-# response.parts[-1].inline_data.data  → audio bytes (audio/mpeg)
+from google import genai
+from google.genai import types
 
-import base64, pathlib
+client = genai.Client(api_key="YOUR_GEMINI_API_KEY")
 
-lyrics = response.parts[0].text
-audio_data = response.parts[-1].inline_data.data
+response = client.models.generate_content(
+    model="lyria-3-pro-preview",
+    contents="Your prompt here.",
+    config=types.GenerateContentConfig(
+        response_modalities=["AUDIO", "TEXT"]
+    ),
+)
+```
 
-# inline_data.data may already be bytes
-if isinstance(audio_data, str):
-    audio_data = base64.b64decode(audio_data)
+### Via Interactions API (Gemini — simplified state management)
+```python
+interaction = client.interactions.create(
+    model="lyria-3-pro-preview",
+    input="A melancholic jazz fusion track in D minor.",
+)
+for output in interaction.outputs:
+    if output.text:
+        print(output.text)
+    elif output.inline_data:
+        with open("output.mp3", "wb") as f:
+            f.write(output.inline_data.data)
+```
 
-pathlib.Path("output.mp3").write_bytes(audio_data)
-print(lyrics)
+### Via OpenRouter (OpenAI-compatible)
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key="YOUR_OPENROUTER_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="google/lyria-3-pro-preview",
+    messages=[{"role": "user", "content": "Your prompt here."}],
+)
 ```
 
 ---
 
-## Pricing
+## Model intelligence
 
-| Provider | Cost |
+Lyria 3 Pro internally reasons about musical structure (intro, verse, chorus, bridge, etc.)
+before generating audio. This ensures structural coherence even without explicit section tags.
+Providing section tags or timestamps overrides and directs this reasoning.
+
+---
+
+## Hard limitations
+
+| Limitation | Detail |
 |---|---|
-| OpenRouter (`google/lyria-3-pro-preview`) | $0.08 per song |
-| Gemini API (direct) | See https://ai.google.dev/pricing |
+| **No artist voice impersonation** | Prompts requesting specific artist voices are blocked by safety filters |
+| **No copyrighted lyrics** | Prompts reproducing exact copyrighted lyrics are blocked |
+| **Single-turn only** | No multi-turn editing; each generation is independent |
+| **Timestamp precision** | Timestamps snap to nearest musical bar, not exact milliseconds |
+| **Clip length fixed** | `lyria-3-clip-preview` always produces exactly 30 seconds |
+| **Language support** | Only 8 languages supported for vocals |
+| **No real-time streaming** | Audio is returned as a complete file, not streamed |
+
+---
+
+## Best practices summary
+
+1. **Iterate with Clip first** — use `lyria-3-clip-preview` to test prompt variations fast; then switch to Pro
+2. **Be specific** — vague prompts produce generic results; name instruments, BPM, key, mood
+3. **Use section tags** — `[Verse]` `[Chorus]` `[Bridge]` give clear structure
+4. **Match language** — write the prompt in the language you want the lyrics in
+5. **Separate lyrics from instructions** — use `Lyrics:` prefix and section tags
+6. **Infer missing details** — if the user doesn't specify, fill in sensible defaults from genre context
 
 ---
 
 ## Further reading
 
-- Quickstart notebook: https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Get_started_Lyria.ipynb
 - Official prompt guide: https://deepmind.google/models/lyria/prompt-guide/
-- Gemini API music generation docs: https://ai.google.dev/gemini-api/docs/music-generation
+- Gemini API music generation: https://ai.google.dev/gemini-api/docs/music-generation
+- Google Cloud ultimate prompting guide: https://cloud.google.com/blog/products/ai-machine-learning/ultimate-prompting-guide-for-lyria-3-pro
+- Colab quickstart: https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Get_started_Lyria.ipynb
 - OpenRouter model page: https://openrouter.ai/google/lyria-3-pro-preview

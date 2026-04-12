@@ -1,11 +1,12 @@
 ---
 name: lyria-3-prompting
 description: >
-  Generates high-quality text prompts for Google's Lyria 3 music generation model
-  (lyria-3-pro-preview and lyria-3-clip-preview) via the Gemini API or OpenRouter.
-  Use this skill when asked to create, compose, or generate music, songs, jingles,
-  soundtracks, or audio from a description. Handles text-to-music, image-to-music,
-  vocal/lyric prompts, instrumental-only tracks, and structured song generation.
+  Translates any user music request into an optimal prompt for Google's Lyria 3 Pro
+  music generation model (lyria-3-pro-preview). Use this skill whenever a user asks
+  to create, compose, or generate music, songs, jingles, soundtracks, or audio from
+  any description — simple or complex. Handles text-to-music, image-to-music, vocal
+  and lyric prompts, instrumental-only tracks, full structured songs, and multilingual
+  generation. Produces the ideal final prompt string to pass to the model.
 license: Apache-2.0
 metadata:
   model-pro: lyria-3-pro-preview
@@ -19,116 +20,209 @@ metadata:
 
 # Lyria 3 Prompting Skill
 
-Generate music with Google's Lyria 3 family of models. Choose your model, craft a
-structured prompt, call the API, and handle the audio + lyrics response.
+Your job is to translate a user's music request — however vague or specific — into
+the best possible prompt for `lyria-3-pro-preview`. You are a music prompt engineer.
+You do NOT call the API yourself; you produce the final prompt string.
 
-## Choose a model
+## Step 1 — Choose the right model
 
-| Model | Use case | Max length |
+| Model | Use case | Length |
 |---|---|---|
-| `lyria-3-clip-preview` | Short clips, loops, experiments | ~30 seconds |
-| `lyria-3-pro-preview` | Full songs with verse/chorus/bridge structure | up to 3 minutes |
+| `lyria-3-pro-preview` | Full songs: verse, chorus, bridge, outro | up to 3 minutes |
+| `lyria-3-clip-preview` | Short clips, loops, quick experiments | exactly 30 seconds |
 
-## Prompt construction
+**Default to `lyria-3-pro-preview`** unless the user explicitly wants a short clip or loop.
 
-Build prompts from these elements — add as many as needed:
+## Step 2 — Apply the core framework
 
-1. **Genre / era** – e.g. `early 90s hip-hop`, `2000s pop`, `K-pop with Motown edge`
-2. **Tempo / energy** – e.g. `slow ballad`, `fast drum and bass`, `120 BPM driving pulse`
-3. **Instruments** – e.g. `acoustic guitar, cello, ambient pads`, `80s synth over 1950s jazz`
-4. **Mood / emotion** – e.g. `uplifting and expansive`, `melancholic and introspective`
-5. **Dynamics / structure** – e.g. `quiet piano builds to explosive chorus, then fades`
-6. **Vocals** – e.g. `male baritone`, `female soprano`, `soulful R&B voice`, or `instrumental only`
-7. **Lyrics** – prepend `Lyrics:` before any lines you want sung; use `(echo)` for backing vocals
-8. **Avoid** – e.g. `avoid harsh distortion, avoid busy percussion`
+Always build the prompt using this formula (include every element you can infer):
 
-### Minimal prompt (text-to-music)
+> **[Genre & style] + [Mood] + [Instrumentation] + [Tempo & rhythm] + [Key/scale] + [Vocal style & language] + [Lyrics or theme] + [Structure]**
+
+Include only the elements that are relevant — but always fill in at least genre, mood,
+and instrumentation even when the user hasn't specified them (infer from context).
+
+### Element reference
+
+| Element | What to write | Examples |
+|---|---|---|
+| **Genre & style** | Primary genre + era or fusion | `early 90s hip-hop`, `2000s indie pop`, `cinematic orchestral`, `K-pop with Motown edge` |
+| **Mood** | Emotional adjectives | `melancholic and introspective`, `uplifting and triumphant`, `tense and suspenseful`, `dreamy and ethereal` |
+| **Instrumentation** | Named instruments (be specific) | `Fender Rhodes piano`, `TR-808 drum machine`, `slide guitar`, `upright bass`, `analog Moog synth` |
+| **Tempo & rhythm** | BPM and/or feel description | `85 BPM`, `120 BPM`, `slow ballad feel`, `driving double-time groove`, `laid-back shuffle` |
+| **Key / scale** | Musical key or scale | `in G major`, `D minor`, `E♭ major`, `Dorian mode` |
+| **Vocals** | Gender, range, texture, delivery | `male baritone, gravelly and raw`, `female soprano, clear and breathy`, `soulful alto`, `no vocals — instrumental only` |
+| **Language** | Language for lyrics/singing | English, German, Spanish, French, Hindi, Japanese, Korean, Portuguese |
+| **Lyrics** | Theme description OR exact lines | Theme: `a love song about distance`; Exact: use `Lyrics:` prefix — see below |
+| **Structure** | Section tags and/or progression | `[Intro] [Verse] [Chorus] [Bridge] [Outro]` or narrative description |
+
+## Step 3 — Add structure using section tags or timestamps
+
+### Section tags (simple structure control)
+
+Place these tags inline in your prompt so Lyria knows where each section starts:
+
 ```
-A cheerful acoustic folk song about a sunrise in the mountains.
+[Intro] Soft acoustic guitar only.
+[Verse] Male vocal enters, intimate and quiet.
+[Chorus] Full band — drums, bass, electric guitar. Vocals soar.
+[Bridge] Stripped back to piano only, emotional and reflective.
+[Outro] Gradual fade with the acoustic guitar returning.
 ```
 
-### Structured prompt (full song)
+Available tags: `[Intro]` `[Verse]` `[Verse 1]` `[Verse 2]` `[Chorus]` `[Bridge]` `[Outro]` `[Hook]` `[Pre-Chorus]`
+
+### Timestamp prompts (precise section control)
+
+Use `[MM:SS]` markers for exact timing — ideal for scoring to video or tight arrangements:
+
+```
+[00:00] Soft lo-fi beat, muffled vinyl crackle, no vocals.
+[00:15] Warm Fender Rhodes melody enters, gentle female vocals about a rainy morning.
+[00:45] Full band drops — upbeat drums, soaring synth lead, hopeful lyrics.
+[01:30] Instrumental bridge, half-time feel, synth pad solo.
+[02:00] Final chorus at full energy.
+[02:40] Outro — piano only, vocals fade out.
+```
+
+## Step 4 — Handle vocals and lyrics
+
+### Vocal profile (always specify at least one)
+- `male baritone, commanding and rich`
+- `female mezzo-soprano, breathy and soulful`
+- `young tenor, fast-paced melodic delivery` (good for J-pop, K-pop)
+- `gravelly blues voice, raw and expressive`
+- `vocal duet: smooth male tenor in English, soft female soprano in French`
+
+### Custom lyrics — use `Lyrics:` prefix with section tags
+
+```
+Create a dreamy indie pop song.
+
+[Verse 1]
+Lyrics:
+Walking through the neon glow,
+city lights reflect below.
+
+[Chorus]
+Lyrics:
+We are the echoes in the night,
+burning brighter than the light.
+```
+
+Use `(backing echo)` in parentheses for backing vocals:
+```
+Lyrics: Let's go (go) to the other side (other side)
+```
+
+### AI-generated lyrics — describe the theme
+- `a love song about a long-distance relationship`
+- `a triumphant song about overcoming failure`
+- `a bittersweet song about leaving your hometown`
+
+### Instrumental only
+Always write: `Instrumental only. No vocals.`
+
+### Language
+Write the prompt **in the target language** OR explicitly state `Sing in Japanese` / `Lyrics in Spanish`. Supported: English, German, Spanish, French, Hindi, Japanese, Korean, Portuguese.
+
+## Step 5 — Write the final prompt
+
+Combine all elements into a flowing paragraph or a labeled list. Both styles work.
+
+### Style A — Natural paragraph (Google's recommended format)
+```
+A romantic fusion of classic Bossa Nova and modern R&B. The mood is intimate, warm,
+and deeply affectionate. Features a gentle acoustic nylon-string guitar, warm electric
+piano chords, and a crisp, laid-back modern hip-hop drum beat at a slow, swaying
+tempo. Featuring a vocal duet: a smooth male vocalist singing in English, and a soft,
+breathy female vocalist singing in French. The lyrics are a beautiful love song about
+an undeniable, cross-cultural connection.
+```
+
+### Style B — Labeled structure (easier to audit and adjust)
 ```
 Genre: cinematic electronic
 Mood: uplifting, expansive, hopeful
 Tempo: medium-fast, driving pulse at ~110 BPM
+Key: A minor
 Instrumentation: analog synth arpeggios, deep sub bass, wide pads, light percussion
 Vocals: clear female lead, breathy and ethereal
-Structure: atmospheric intro → verse → rising chorus → bridge with half-time feel → final chorus → soft outro
+Structure: [Intro] atmospheric synth pad → [Verse] vocals enter softly → [Chorus] full energy drop → [Bridge] half-time breakdown → [Outro] fade with pads
 Avoid: harsh distortion, overly busy percussion
 ```
 
-### Prompt with custom lyrics
+## Translation examples — vague → ideal prompt
+
+### "Make me a chill song"
 ```
-A soulful R&B song in the style of early 2000s neo-soul.
-Instrumentation: Rhodes piano, brushed drums, warm bass.
-
-Lyrics:
-Walking through the city lights (city lights)
-Every step I take feels right (feels right)
-```
-
-### Image-to-music
-Supply an image part alongside a text prompt — Lyria infers mood, setting, and energy
-from the visual. See [references/REFERENCE.md](references/REFERENCE.md#image-to-music).
-
-## Calling the API
-
-### Via Gemini API (Python)
-
-```python
-from google import genai
-from google.genai import types
-
-client = genai.Client(api_key="YOUR_GEMINI_API_KEY")
-
-response = client.models.generate_content(
-    model="lyria-3-pro-preview",
-    contents="A cheerful acoustic folk song about a sunrise in the mountains.",
-    config=types.GenerateContentConfig(
-        response_modalities=["Audio", "Text"]
-    ),
-)
-
-lyrics = response.parts[0].text          # timestamped lyrics
-audio  = response.parts[-1].inline_data  # audio/mpeg bytes
+A warm, modern lo-fi hip-hop beat for studying and relaxing. Muffled boom-bap drums
+at 85 BPM, dusty jazz piano samples, a smooth upright bass line, and soft vinyl
+crackle. Laid-back and nostalgic mood. Instrumental only. No vocals.
 ```
 
-Run the full example: `scripts/generate.py`
-
-### Via OpenRouter (OpenAI-compatible)
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="YOUR_OPENROUTER_API_KEY",
-)
-
-response = client.chat.completions.create(
-    model="google/lyria-3-pro-preview",
-    messages=[{"role": "user", "content": "An upbeat jazz song for a coffee shop morning."}],
-)
+### "I want something epic"
+```
+An epic cinematic orchestral piece about a hero's journey. Starts with a solo cello
+playing a mournful melody, builds through sweeping string sections and French horns,
+and climaxes with a massive wall of sound — full orchestra, choir, and powerful
+timpani at 130 BPM. Mood: triumphant and emotionally overwhelming. Key: D minor.
+Instrumental only.
 ```
 
-## Saving the audio
+### "A sad song about losing someone"
+```
+A melancholic indie folk song about grief and memory. Acoustic guitar fingerpicking,
+sparse piano, and gentle cello. Slow tempo, around 65 BPM, in E minor. Vocals: a
+soft male tenor, raw and emotionally vulnerable. The lyrics are about holding onto
+fading memories of someone you've lost.
 
-```python
-import base64, pathlib
-
-audio_b64 = response.parts[-1].inline_data.data
-audio_bytes = base64.b64decode(audio_b64) if isinstance(audio_b64, str) else audio_b64
-pathlib.Path("output.mp3").write_bytes(audio_bytes)
+[Verse] Quiet guitar and piano only, hushed vocals.
+[Chorus] Cello swells in, vocals rise with restrained emotion.
+[Bridge] Instrumental only — guitar solo, no vocals.
+[Outro] Single acoustic guitar, vocals fade to silence.
 ```
 
-## Common edge cases
+### "Upbeat pop song for a workout"
+```
+A high-energy, motivational pop track at 128 BPM in G major. Bright electric guitar
+riffs, punchy electronic drums, a driving synth bassline, and soaring synth pads.
+Mood: powerful, unstoppable, euphoric. Vocals: strong female lead, confident and
+commanding. Lyrics about pushing your limits and never giving up.
+```
 
-- **Instrumental only** — include `No vocals. Instrumental only.` in the prompt.
-- **Specific language** — specify `Lyrics in Spanish` or `Sing in Japanese`.
-- **Timestamped lyrics** — the API returns `[seconds:] lyric line` format automatically.
-- **Clip vs Pro** — use `lyria-3-clip-preview` for fast iteration; switch to `lyria-3-pro-preview` for full-length output.
-- **Cost** — `lyria-3-pro-preview` via OpenRouter costs $0.08 per song.
+### "Something like K-pop but with jazz"
+```
+An upbeat K-pop track with a jazz fusion edge. Bright, sparkling synths and electric
+guitar over a walking jazz bass line and tight swing drums at 110 BPM. Mood: playful,
+charming, and sophisticated. Vocals: clear female lead soprano singing in Korean,
+fast-paced and melodic with sweet harmonies. Lyrics about falling in love for the
+first time.
+```
 
-See [references/REFERENCE.md](references/REFERENCE.md) for detailed guidance on
-timestamped prompts, image-to-music, and advanced vocal techniques.
+## What Lyria 3 Pro does NOT support (hard limits)
+
+Do not attempt these — the request will be blocked or produce poor results:
+
+- **Specific artist voices** — never write "sound like Adele" or "in the style of Drake's voice". Genre/era references are fine; voice impersonation is not.
+- **Copyrighted lyrics** — do not reproduce exact lyrics from existing songs.
+- **Multi-turn editing** — generation is single-turn only. Each prompt is a fresh generation.
+- **Exact beat-level synchronization** — timestamps snap to the nearest musical bar, not exact milliseconds.
+- **Languages outside the 8 supported** — stick to English, German, Spanish, French, Hindi, Japanese, Korean, Portuguese.
+
+## Quick decision guide
+
+| User says... | You should add... |
+|---|---|
+| Nothing about instruments | Infer from genre; name 2–3 specific instruments |
+| Nothing about mood | Infer from theme; add 2–3 emotional adjectives |
+| Nothing about structure | Add `[Verse]` `[Chorus]` `[Bridge]` `[Outro]` tags |
+| Nothing about tempo | Infer from genre or add a descriptive feel (`slow ballad`, `driving groove`) |
+| Wants a full song | Use `lyria-3-pro-preview`; add section tags |
+| Wants a loop or short clip | Use `lyria-3-clip-preview`; keep prompt focused |
+| Wants no singing | Add `Instrumental only. No vocals.` |
+| Wants specific lyrics | Use `Lyrics:` prefix with section tags |
+| Wants foreign language | Write prompt in that language OR add `Sing in [language]` |
+
+See [references/REFERENCE.md](references/REFERENCE.md) for advanced techniques:
+timestamp prompting, image-to-music, PDF input, WAV output, and full API reference.
