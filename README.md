@@ -1,35 +1,30 @@
-# Lyria-3 skill: prompting `google/lyria-3-pro-preview`
+# Lyria 3 Prompting Skill
 
-Use this skill to create high-quality prompts for music generation with Lyria 3.
+An [Agent Skills](https://agentskills.io) package for generating music with
+Google's **Lyria 3** family of models (`lyria-3-pro-preview` / `lyria-3-clip-preview`)
+via the Gemini API or OpenRouter.
 
-## Model
-- OpenRouter model id: `google/lyria-3-pro-preview`
-- Model page: https://openrouter.ai/google/lyria-3-pro-preview
+## Skill
 
-## Prompting references
-- Quickstart notebook: https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Get_started_Lyria.ipynb
+The skill lives in [`lyria-3-prompting/`](lyria-3-prompting/):
+
+| File | Purpose |
+|---|---|
+| [`lyria-3-prompting/SKILL.md`](lyria-3-prompting/SKILL.md) | Skill instructions + quick-start API examples |
+| [`lyria-3-prompting/references/REFERENCE.md`](lyria-3-prompting/references/REFERENCE.md) | Detailed prompt guide, image-to-music, lyrics, timestamped prompts |
+| [`lyria-3-prompting/scripts/generate.py`](lyria-3-prompting/scripts/generate.py) | CLI script for generating a song via the Gemini Python SDK |
+
+## Quick start
+
+```bash
+pip install 'google-genai>=1.62.0'
+export GEMINI_API_KEY=your_key_here
+python lyria-3-prompting/scripts/generate.py "An upbeat jazz song for a coffee shop morning."
+```
+
+## References
+
+- OpenRouter model page: https://openrouter.ai/google/lyria-3-pro-preview
+- Colab quickstart: https://colab.research.google.com/github/google-gemini/cookbook/blob/main/quickstarts/Get_started_Lyria.ipynb
 - Official prompt guide: https://deepmind.google/models/lyria/prompt-guide/
-
-## Prompt template
-Use a concise, structured prompt:
-
-```text
-Style/Genre:
-Mood/Emotion:
-Tempo/Energy:
-Instrumentation:
-Production qualities:
-Structure (intro/build/drop/outro):
-Avoid:
-```
-
-## Example
-```text
-Style/Genre: cinematic electronic
-Mood/Emotion: uplifting, expansive, hopeful
-Tempo/Energy: medium-fast, driving pulse
-Instrumentation: analog synth arps, deep sub bass, wide pads, light percussion
-Production qualities: polished, wide stereo image, clean low end
-Structure (intro/build/drop/outro): atmospheric intro, gradual build, energetic peak, soft outro
-Avoid: harsh distortion, overly busy percussion
-```
+- Agent Skills spec: https://agentskills.io/specification
