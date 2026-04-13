@@ -47,13 +47,23 @@ Available: `[Intro]` `[Verse]` `[Verse 1]` `[Verse 2]` `[Pre-Chorus]` `[Chorus]`
 Use `[MM:SS]` markers to assign specific instructions to moments in the song. Timestamps snap to the nearest musical bar — do not expect sample-accurate sync.
 
 ```
-[00:00] Begin with a massive gospel choir, powerful and uplifting.
-[00:15] Heavy hip-hop drums and deep 808 bass drop in.
-[00:30] Male rapper delivers a confident verse; choir punctuates his lines.
-[01:10] Transition into a triumphant chorus — gospel choir at full volume, brass horns.
-[01:50] Strip back to Hammond B3 organ; quiet emotional bridge, soft choir hums.
-[02:10] Full beat and choir return at maximum energy for the final chorus.
-[03:00] End on a sustained, resonant choir chord.
+Modern electronic-infused metalcore. Huge distorted guitar riffs, emotional dual vocals
+(harsh screams + melodic clean chorus), cinematic synth layers, glitchy electronic
+textures, massive hybrid drums, dark futuristic atmosphere, ultra-polished production.
+
+[00:00] Ambient tension intro — dark synth pads, glitchy electronic textures, processed
+        guitar swells building unease.
+[00:20] Hybrid percussion and distorted guitar riffs slam in; harsh screaming vocals,
+        dense synth layers underneath, relentless energy.
+[00:55] Pre-chorus — melodic clean vocals emerge over cinematic synth build, dynamic
+        contrast intensifies.
+[01:15] Massive chorus drop — melodic hook, soaring clean vocals, huge guitars and
+        orchestral synth swell, polished radio-ready production.
+[01:50] Breakdown — half-time drums, glitch processing, ambient tension pads, processed
+        guitar textures, cinematic emotional pull.
+[02:15] Final chorus at maximum intensity — dual vocals (screams layered under clean
+        melody), dense synth sound design, hybrid orchestral elements, futuristic energy.
+[02:55] Outro — electronic textures dissolve, single distorted guitar fades into silence.
 ```
 
 ---
