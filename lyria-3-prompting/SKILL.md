@@ -8,6 +8,12 @@ description: >
   and lyric prompts, instrumental-only tracks, full structured songs, and multilingual
   generation. Produces the ideal final prompt string to pass to the model.
 license: Apache-2.0
+compatibility: >
+  Requires Python 3.9+ and the google-genai Python package (>=1.62.0).
+  The generate.py script needs a GEMINI_API_KEY environment variable.
+  Network access required to reach the Gemini API (generativelanguage.googleapis.com)
+  and optionally OpenRouter (openrouter.ai). Compatible with any skills-compatible
+  agent that can read Markdown and optionally execute Python scripts.
 metadata:
   model-pro: lyria-3-pro-preview
   model-clip: lyria-3-clip-preview
